@@ -24,7 +24,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Test
-        run: ls -R
+        run: ls -lah
 
       - name: Debug
         run: cat ./valgrind.txt

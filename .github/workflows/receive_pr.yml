@@ -18,10 +18,10 @@ jobs:
       - name: Build
         run: /bin/bash ./build.sh
 
-      - name: Save PR number
+      - name: Save Valgrind output
         run: |
           mkdir outputs
-          valgrind --leak-check=yes ./prog > ./outputs/valgrind.txt
+          valgrind --log-file=./outputs/valgrind.txt --leak-check=yes ./prog
 
       - uses: actions/upload-artifact@v4
         with:
