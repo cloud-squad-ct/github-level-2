@@ -36,7 +36,7 @@ jobs:
           script: |
             var fs = require('fs');
             github.rest.issues.createComment({
-              issue_number: ${{ github.event.workflow_run.event.pull_request.number }},
+              issue_number: ${{ github.event.workflow_run.event.pull_requests.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: fs.readFileSync('./valgrind.txt'))
