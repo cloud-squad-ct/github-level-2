@@ -18,11 +18,11 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          run-id: ${{ github.event.workflow_run.id }}
           name: valgrind
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Comment on PR
-        id: commenter
         run: gh pr comment "$NUMBER" --body-file ./valgrind/output.txt
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
