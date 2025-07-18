@@ -7,7 +7,6 @@ on:
       - completed
 
 permissions:
-  actions: read
   pull-requests: write
 
 jobs:
@@ -29,6 +28,19 @@ jobs:
           JSON: ${{ toJSON(github.event) }}
         run: echo $JSON
 
+      - name: test2
+        env:
+          JSON: ${{ toJSON(github.event.workflow_run) }}
+        run: echo $JSON
+
+      - name: test3
+        env:
+          JSON: ${{ toJSON(github.event.workflow_run.pull_requests) }}
+        run: echo $JSON
+
+      - name: test4
+        run: echo ${{ github.event.workflow_run.pull_requests.number }}
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
@@ -41,8 +53,3 @@ jobs:
               repo: context.repo.repo,
               body: fs.readFileSync('./valgrind.txt'))
             })
-        # run: gh pr comment "$NUMBER" --body-file ./valgrind.txt
-        # env:
-        #   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   GH_REPO: ${{ github.repository }}
-          # NUMBER: ${{ github.event.workflow_run.event.pull_request.number }}
