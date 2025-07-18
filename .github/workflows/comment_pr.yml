@@ -24,6 +24,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
+      - name: test
+        run: ls -R
+
       - name: Comment on PR
         run: gh pr comment "$NUMBER" --body-file ./valgrind/output.txt
         env:
