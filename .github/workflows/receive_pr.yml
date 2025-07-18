@@ -20,10 +20,10 @@ jobs:
 
       - name: Save PR number
         run: |
-          mkdir -p ./pr
-          valgrind --leak-check=yes ./prog > ./pr/valgrind_output
+          mkdir -p ./valgrind
+          valgrind --leak-check=yes ./prog > ./valgrind/output.txt
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pr
-          path: pr/
+          name: valgrind
+          path: valgrind/
