@@ -1,0 +1,27 @@
+name: Receive PR
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Valgrind
+        run: apt install valgrind
+
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: /bin/bash ./build.sh
+
+      - name: Save PR number
+        run: |
+          mkdir -p ./pr
+          valgrind --leak-check=yes ./prog > ./pr/valgrind_output
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pr
+          path: pr/
