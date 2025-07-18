@@ -25,11 +25,24 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: test
-        run: ls -R
+        env:
+          JSON: ${{ toJSON(github.event) }}
+        run: echo $JSON
 
       - name: Comment on PR
-        run: gh pr comment "$NUMBER" --body-file ./valgrind.txt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          NUMBER: ${{ github.event.workflow_run.event.pull_request.number }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            var fs = require('fs');
+            github.rest.issues.createComment({
+              issue_number: ${{ github.event.workflow_run.event.pull_request.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: fs.readFileSync('./valgrind.txt'))
+            })
+        # run: gh pr comment "$NUMBER" --body-file ./valgrind.txt
+        # env:
+        #   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   GH_REPO: ${{ github.repository }}
+          # NUMBER: ${{ github.event.workflow_run.event.pull_request.number }}
