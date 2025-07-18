@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Install Valgrind
-        run: apt install valgrind
+        run: apt install -y valgrind
 
       - uses: actions/checkout@v4
 
