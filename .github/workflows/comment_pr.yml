@@ -42,9 +42,10 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
+            const fs = require('fs');
             github.rest.issues.createComment({
               issue_number: ${{ github.event.workflow_run.pull_requests[0].number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: fs.readFileSync('./valgrind.txt').toString()
-            })
+            });
