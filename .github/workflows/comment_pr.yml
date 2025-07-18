@@ -16,6 +16,10 @@ jobs:
       actions: read
       pull-requests: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: format.sh
+
       - name: Download artifact
         id: downloader
         uses: actions/download-artifact@v4
