@@ -12,8 +12,8 @@ then
 	exit 1
 fi
 
-tool_name=${1%.*}
-program_name=$(grep "Command:" $1 | cut -d" " -f3)
+tool_name=$(basename ${1%.*})
+program_name=$(basename $(grep "Command:" $1 | cut -d" " -f3))
 valgrind_body=$(tail -n +5 $1)
 
 
@@ -21,10 +21,10 @@ cat << EOF > output.md
 # Program Analysis
 
 Analyzed program: $program_name
-Tool used: $tool_name
 
 ---
 
-Here's what was found:
+## $tool_name
+
 $valgrind_body
 EOF
