@@ -2,7 +2,11 @@
 
 ## Description
 
-tktk
+MAYBE NEED TO REVIEW THIS WORKFLOW SINCE THERE IS:
+
+- workflow_run
+- artifact
+- dangerous checkout
 
 ## Solution (NEED TO DOUBLE CHECK, is there also a way to do it by modifying directly Receive PR?)
 
