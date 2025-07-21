@@ -14,8 +14,6 @@ jobs:
           sudo apt install -y valgrind
 
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Build
         run: /bin/bash ./build.sh
