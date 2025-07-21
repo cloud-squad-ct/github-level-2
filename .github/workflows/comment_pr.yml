@@ -41,7 +41,7 @@ jobs:
         uses: actions/github-script@v7
         id: commenter
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             github.rest.issues.createComment({
