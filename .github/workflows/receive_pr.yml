@@ -24,7 +24,7 @@ jobs:
           sudo apt install -y valgrind
 
       - name: Build
-        run: /bin/bash ./build.sh
+        run: make
 
       - name: Save Valgrind output
         run: valgrind --log-file=./outputs/valgrind.txt --leak-check=yes ./prog

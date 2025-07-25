@@ -35,7 +35,6 @@ jobs:
         env:
           FLAG: ${{ secrets.FLAG }}
         run: |
-          env
           chmod +x ./format.sh
           ./format.sh ./valgrind.txt
 
