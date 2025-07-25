@@ -2,15 +2,16 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O2
 
-# Target name
+# Targets
 TARGET = prog
 
-# Build rule
+# Default rule
 all: $(TARGET)
 
+# Rule to build the binary
 $(TARGET): main.c
-	$(CC) $(CFLAGS) -o $(TARGET) main.c
+	$(CC) $(CFLAGS) -o $@ main.c
 
-# Clean rule
+# Clean everything
 clean:
 	rm -f $(TARGET)
