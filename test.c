@@ -2,6 +2,8 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <stdarg.h>
+#include <sys/types.h>
 
 int open(const char *pathname, int flags, ...) {
     static int (*real_open)(const char *, int, ...) = NULL;
@@ -12,7 +14,7 @@ int open(const char *pathname, int flags, ...) {
 
     printf("[LD_PRELOAD LOG] open called: %s\n", pathname);
 
-    // Handle variable argument for open()
+    // Handle optional third argument (mode) when O_CREAT is set
     if (flags & O_CREAT) {
         va_list args;
         va_start(args, flags);
