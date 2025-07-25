@@ -8,22 +8,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up outputs directory
+        run: mkdir -p outputs
+
+      - name: Store PR information
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo ${{ github.event.number }} > ./outputs/pr.txt
+
       - name: Install Valgrind
         run: |
           sudo apt update
           sudo apt install -y valgrind
 
-      - uses: actions/checkout@v4
-
       - name: Build
         run: /bin/bash ./build.sh
 
       - name: Save Valgrind output
-        run: |
-          mkdir outputs
-          valgrind --log-file=./outputs/valgrind.txt --leak-check=yes ./prog
+        run: valgrind --log-file=./outputs/valgrind.txt --leak-check=yes ./prog
 
-      - uses: actions/upload-artifact@v4
+      - name: Save all infos
+        uses: actions/upload-artifact@v4
         with:
           name: outputs
           path: outputs/
+      
