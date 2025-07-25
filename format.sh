@@ -20,7 +20,6 @@ valgrind_body=$(tail -n +5 $1)
 cat << EOF > output.md
 # Program Analysis
 
-Analysis performed for PR ${PR_NUMBER}
 Analyzed program: $program_name
 
 ---

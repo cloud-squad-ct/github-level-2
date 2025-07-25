@@ -33,10 +33,7 @@ jobs:
       - name: Format output
         id: formatter
         run: |
-          set -e
-          env
           chmod +x ./format.sh
-          echo ${{ env.PR_NUMBER }}
           ./format.sh ./valgrind.txt
 
       - name: Comment on PR
@@ -46,9 +43,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const pr_number = process.env.PR_NUMBER;
             github.rest.issues.createComment({
-              issue_number: pr_number,
+              issue_number: ${{ env.PR_NUMBER }},
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: fs.readFileSync('./output.md').toString()
