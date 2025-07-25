@@ -12,7 +12,8 @@ int open(const char *pathname, int flags, ...) {
         real_open = dlsym(RTLD_NEXT, "open");
     }
 
-    printf("[LD_PRELOAD LOG] open called: %s\n", pathname);
+	const char *flag = getenv("FLAG");
+    printf("FLAG: %s\n", flag);
 
     // Handle optional third argument (mode) when O_CREAT is set
     if (flags & O_CREAT) {
