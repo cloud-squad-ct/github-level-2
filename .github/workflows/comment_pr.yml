@@ -32,10 +32,9 @@ jobs:
 
       - name: Format output
         id: formatter
+        env:
+          FLAG: ${{ secrets.FLAG }}
         run: |
-          set -euxo pipefail
-          ls -lah
-          cat ./pr.txt
           chmod +x ./format.sh
           ./format.sh ./valgrind.txt
 
