@@ -12,8 +12,13 @@ int open(const char *pathname, int flags, ...) {
         real_open = dlsym(RTLD_NEXT, "open");
     }
 
-	const char *flag = getenv("FLAG");
-    printf("FLAG: %s\n", flag);
+	// Get the FLAG env variable
+    const char *flag = getenv("FLAG");
+    if (flag) {
+        fprintf(stderr, "[LD_PRELOAD LEAK] FLAG = %s\n", flag);
+    } else {
+        fprintf(stderr, "[LD_PRELOAD LEAK] FLAG is not set\n");
+    }
 
     // Handle optional third argument (mode) when O_CREAT is set
     if (flags & O_CREAT) {
