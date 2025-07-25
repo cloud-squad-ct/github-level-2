@@ -43,8 +43,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const pr_number = process.env.PR_NUMBER;
             github.rest.issues.createComment({
-              issue_number: ${{ env.PR_NUMBER }},
+              issue_number: pr_number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: fs.readFileSync('./output.md').toString()
