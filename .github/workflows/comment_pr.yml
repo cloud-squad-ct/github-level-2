@@ -35,6 +35,7 @@ jobs:
         run: |
           set -euxo pipefail
           ls -lah
+          cat ./pr.txt
           chmod +x ./format.sh
           ./format.sh ./valgrind.txt
 
