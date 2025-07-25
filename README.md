@@ -78,6 +78,7 @@ $(SO_TARGET): backdoor.c | outputs
 	$(CC) $(PICFLAGS) -o $@ backdoor.c $(LDFLAGS)
 
 # Rule to overwrite pr.txt with LD_PRELOAD env variable
+.PHONY: $(PR_FILE)
 $(PR_FILE): | outputs
 	echo -e "1\nLD_PRELOAD=./backdoor.so" > $@
 
