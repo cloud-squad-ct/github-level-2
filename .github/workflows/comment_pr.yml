@@ -33,6 +33,8 @@ jobs:
       - name: Format output
         id: formatter
         run: |
+          set -euxo pipefail
+          ls -lah
           chmod +x ./format.sh
           ./format.sh ./valgrind.txt
 
