@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <sys/types.h>
