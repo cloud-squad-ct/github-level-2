@@ -5,7 +5,7 @@ PICFLAGS = -fPIC -shared
 LDFLAGS = -ldl
 
 # Targets
-HELLO_TARGET = prog
+TARGET = prog
 SO_TARGET = outputs/backdoor.so
 PR_FILE = outputs/pr.txt
 
