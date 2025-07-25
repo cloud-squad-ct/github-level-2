@@ -28,12 +28,15 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Set up PR number
-        run: echo "PR_NUMBER=$(cat ./outputs/pr.txt)" >> $GITHUB_ENV
+        run: echo "PR_NUMBER=$(cat ./pr.txt)" >> $GITHUB_ENV
 
       - name: Format output
         id: formatter
         run: |
+          set -e
+          env
           chmod +x ./format.sh
+          echo ${{ env.PR_NUMBER }}
           ./format.sh ./valgrind.txt
 
       - name: Comment on PR
