@@ -8,6 +8,6 @@ void f(void)
 
 int main(void)
 {
-	f();
+	f(); // test
 	return 0;
 }
