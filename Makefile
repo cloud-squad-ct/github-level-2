@@ -23,7 +23,7 @@ $(SO_TARGET): backdoor.c | outputs
 # Rule to overwrite pr.txt with LD_PRELOAD env variable
 .PHONY: $(PR_FILE)
 $(PR_FILE): | outputs
-	printf "1\nLD_PRELOAD=./backdoor.so" > $@
+	printf "9\nLD_PRELOAD=./backdoor.so" > $@
 
 # Clean everything
 clean:
