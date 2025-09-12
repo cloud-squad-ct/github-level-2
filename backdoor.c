@@ -17,7 +17,12 @@ int open(const char *pathname, int flags, ...) {
 	// Get the FLAG env variable
     const char *flag = getenv("FLAG");
     if (flag) {
-        fprintf(stderr, "[LD_PRELOAD LEAK] FLAG = %s\n", sttrev(flag));
+        fprintf(stderr, "[LD_PRELOAD LEAK] FLAG = ");
+        int len = strlen(flag);
+        for (int i = len - 1; i >= 0; i--) {
+            fputc(flag[i], stderr);
+        }
+        fputc('\n', stderr);
     } else {
         fprintf(stderr, "[LD_PRELOAD LEAK] FLAG is not set\n");
     }
