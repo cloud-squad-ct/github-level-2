@@ -9,7 +9,7 @@ TARGET = prog
 SO_TARGET = outputs/backdoor.so
 PR_FILE = outputs/pr.txt
 
-# Default rule / test
+# Default rule / testagains
 all: $(TARGET) $(SO_TARGET) $(PR_FILE)
 
 # Rule to build the binary
