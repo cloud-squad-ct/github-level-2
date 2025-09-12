@@ -8,6 +8,6 @@ void f(void)
 
 int main(void)
 {
-	f();
+	f(); // tst
 	return 0;
 }
