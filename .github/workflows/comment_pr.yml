@@ -37,9 +37,6 @@ jobs:
         run: |
           chmod +x ./format.sh
           ./format.sh ./valgrind.txt
-          echo '----'
-          cat ./output.md
-          echo '----'
 
       - name: Comment on PR
         uses: actions/github-script@v7
