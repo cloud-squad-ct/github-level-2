@@ -1,0 +1,16 @@
+{
+	"name": "level-2",
+	"version": "1.0.0",
+	"description": "Level 2",
+	"license": "ISC",
+	"author": "John",
+	"type": "commonjs",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js",
+		"test": "node tests/test.js"
+	},
+	"dependencies": {
+		"colors": "^1.4.0"
+	}
+}

